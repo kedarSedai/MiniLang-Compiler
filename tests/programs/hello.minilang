@@ -1,0 +1,12 @@
+int main() {
+    int a = 10;
+    int b = 20;
+  /* block
+     comment */
+    bool ok = a < b && b != 0;
+    if (ok) {
+        return a + b;
+    } else {
+        return 0;
+    }
+}

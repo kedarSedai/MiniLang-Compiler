@@ -1,0 +1,29 @@
+cmake_minimum_required(VERSION 3.16)
+project(minilang_compiler LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+add_library(minilang_frontend
+    src/lexer/token.cpp
+    src/lexer/lexer.cpp
+)
+
+target_include_directories(minilang_frontend
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+target_compile_options(minilang_frontend PRIVATE
+    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic>
+)
+
+add_executable(minilang_lexer src/tools/lexer_main.cpp)
+target_link_libraries(minilang_lexer PRIVATE minilang_frontend)
+
+enable_testing()
+add_test(
+    NAME lexer_smoke
+    COMMAND minilang_lexer ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
+)
