@@ -6,7 +6,6 @@ A small research compiler with the classic pipeline: **lexer → parser → sema
 
 | Criterion | C++ | Rust |
 |-----------|-----|------|
-| Your familiarity | Strong (faster solo iteration) | Learn-as-you-go cost |
 | LLVM integration | Native C++ API (what LLVM is written in) | `inkwell` wrapper (solid, extra layer) |
 | Research artifacts | Easy for reviewers to read if they know compilers | Growing, slightly smaller hiring pool |
 | Lexer/parser | Hand-written or Flex/Bison (standard in courses) | `logos` / `lalrpop` (excellent ergonomics) |
