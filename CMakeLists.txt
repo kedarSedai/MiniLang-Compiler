@@ -8,6 +8,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(minilang_frontend
     src/lexer/token.cpp
     src/lexer/lexer.cpp
+    src/ast/ast.cpp
+    src/parser/parser.cpp
 )
 
 target_include_directories(minilang_frontend
@@ -22,8 +24,19 @@ target_compile_options(minilang_frontend PRIVATE
 add_executable(minilang_lexer src/tools/lexer_main.cpp)
 target_link_libraries(minilang_lexer PRIVATE minilang_frontend)
 
+add_executable(minilang_parser src/tools/parser_main.cpp)
+target_link_libraries(minilang_parser PRIVATE minilang_frontend)
+
 enable_testing()
 add_test(
     NAME lexer_smoke
     COMMAND minilang_lexer ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
+)
+add_test(
+    NAME parser_smoke
+    COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
+)
+add_test(
+    NAME parser_hello
+    COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang
 )
