@@ -30,7 +30,7 @@ compiler/
 
 ```bash
 make
-./build/minilang_lexer tests/programs/hello.minilang
+./build/minilang_parser tests/programs/hello.minilang
 ```
 
 **CMake (optional):**
@@ -40,9 +40,16 @@ cmake -S . -B build
 cmake --build build
 ```
 
-## Current phase: Lexical analyzer
+## Current phase: Parser + AST
 
-Run the lexer driver on a `.minilang` file to print tokens with source locations.
+The lexer and a hand-written recursive-descent parser build an AST. Use the parser driver to print the tree:
+
+```bash
+make parser
+./build/minilang_parser tests/programs/factorial.minilang
+```
+
+The lexer driver is still available:
 
 ```bash
 ./build/minilang_lexer tests/programs/factorial.minilang
@@ -50,8 +57,8 @@ Run the lexer driver on a `.minilang` file to print tokens with source locations
 
 ## Roadmap
 
-1. Lexer (this phase)
-2. Parser + AST
+1. ~~Lexer~~ ✓
+2. ~~Parser + AST~~ ✓ (current)
 3. Semantic analysis
 4. HIR + rule-based optimizations
 5. LLVM IR emission

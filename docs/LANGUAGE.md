@@ -23,4 +23,31 @@ int factorial(int n) {
 }
 ```
 
-(Syntax and semantics will be refined when the parser lands.)
+## Syntax (parser)
+
+```
+program     ::= function*
+function    ::= type IDENT "(" [ parameters ] ")" block
+parameters  ::= type IDENT ( "," type IDENT )*
+block       ::= "{" statement* "}"
+statement   ::= block
+              | type IDENT "=" expression ";"
+              | "if" "(" expression ")" statement [ "else" statement ]
+              | "while" "(" expression ")" statement
+              | "return" [ expression ] ";"
+              | expression ";"
+expression  ::= logical_or
+logical_or  ::= logical_and ( "||" logical_and )*
+logical_and ::= equality ( "&&" equality )*
+equality    ::= comparison ( ( "==" | "!=" ) comparison )*
+comparison  ::= term ( ( "<" | "<=" | ">" | ">=" ) term )*
+term        ::= factor ( ( "+" | "-" ) factor )*
+factor      ::= unary ( ( "*" | "/" | "%" ) unary )*
+unary       ::= ( "!" | "-" ) unary | call
+call        ::= primary
+primary     ::= INT | "true" | "false" | IDENT [ "(" [ arguments ] ")" ] | "(" expression ")"
+arguments   ::= expression ( "," expression )*
+type        ::= "int" | "bool" | "void"
+```
+
+Semantics (types, scopes) are not checked yet; the parser only validates syntax.
