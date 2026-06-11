@@ -10,6 +10,7 @@ add_library(minilang_frontend
     src/lexer/lexer.cpp
     src/ast/ast.cpp
     src/parser/parser.cpp
+    src/semantic/semantic_analyzer.cpp
 )
 
 target_include_directories(minilang_frontend
@@ -27,6 +28,9 @@ target_link_libraries(minilang_lexer PRIVATE minilang_frontend)
 add_executable(minilang_parser src/tools/parser_main.cpp)
 target_link_libraries(minilang_parser PRIVATE minilang_frontend)
 
+add_executable(minilang_semantic src/tools/semantic_main.cpp)
+target_link_libraries(minilang_semantic PRIVATE minilang_frontend)
+
 enable_testing()
 add_test(
     NAME lexer_smoke
@@ -39,4 +43,16 @@ add_test(
 add_test(
     NAME parser_hello
     COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang
+)
+add_test(
+    NAME semantic_factorial
+    COMMAND minilang_semantic ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
+)
+add_test(
+    NAME semantic_hello
+    COMMAND minilang_semantic ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang
+)
+add_test(
+    NAME semantic_hello_world
+    COMMAND minilang_semantic ${CMAKE_SOURCE_DIR}/tests/programs/helloWorld.minilang
 )

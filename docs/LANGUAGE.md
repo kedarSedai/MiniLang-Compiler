@@ -50,4 +50,18 @@ arguments   ::= expression ( "," expression )*
 type        ::= "int" | "bool" | "void"
 ```
 
-Semantics (types, scopes) are not checked yet; the parser only validates syntax.
+## Semantic rules
+
+The semantic analyzer (`minilang_semantic`) checks:
+
+- **Functions:** no duplicate definitions; calls match arity and parameter types.
+- **Variables:** declared before use; no duplicate declarations in the same block scope.
+- **Scopes:** nested blocks; inner scopes may shadow outer names.
+- **Types:**
+  - `int` literals and arithmetic (`+ - * / %`) use `int`
+  - `true` / `false` and `&&` / `||` / `!` use `bool`
+  - comparisons (`< <= > >=`) require `int`, produce `bool`
+  - `==` / `!=` require matching `int` or `bool` operands, produce `bool`
+  - `if` / `while` conditions must be `bool`
+  - variable initializers and `return` values must match the declared / function type
+  - `void` functions may use `return;` but not `return expr;`

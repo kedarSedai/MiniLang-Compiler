@@ -93,6 +93,10 @@ Program Parser::parse() {
         } else {
             error_at_current("expected function declaration");
             synchronize();
+            if (!check(TokenKind::Eof) && !check(TokenKind::KwInt) &&
+                !check(TokenKind::KwBool) && !check(TokenKind::KwVoid)) {
+                advance();
+            }
         }
     }
 
