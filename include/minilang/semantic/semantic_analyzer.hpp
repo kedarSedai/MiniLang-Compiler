@@ -13,9 +13,7 @@ class SemanticAnalyzer {
 public:
     explicit SemanticAnalyzer(const Program& program);
 
-    /// Registers functions, then type-checks all bodies. Returns false on error.
     bool analyze();
-
     bool had_error() const { return had_error_; }
 
 private:

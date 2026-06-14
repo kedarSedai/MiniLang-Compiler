@@ -52,16 +52,21 @@ type        ::= "int" | "bool" | "void"
 
 ## Semantic rules
 
-The semantic analyzer (`minilang_semantic`) checks:
+- Functions: no duplicates; calls match arity and parameter types.
+- Variables: declare before use; block scopes with optional shadowing.
+- Types: `int`/`bool` enforced on operators, conditions, returns, and initializers.
 
-- **Functions:** no duplicate definitions; calls match arity and parameter types.
-- **Variables:** declared before use; no duplicate declarations in the same block scope.
-- **Scopes:** nested blocks; inner scopes may shadow outer names.
-- **Types:**
-  - `int` literals and arithmetic (`+ - * / %`) use `int`
-  - `true` / `false` and `&&` / `||` / `!` use `bool`
-  - comparisons (`< <= > >=`) require `int`, produce `bool`
-  - `==` / `!=` require matching `int` or `bool` operands, produce `bool`
-  - `if` / `while` conditions must be `bool`
-  - variable initializers and `return` values must match the declared / function type
-  - `void` functions may use `return;` but not `return expr;`
+## HIR (high-level IR)
+
+After semantic analysis, the AST is lowered to flat HIR per function:
+
+- **Temporaries** (`%t0`, `%t1`, …) for expression results
+- **Locals** via `load_local` / `store_local`
+- **Control flow** via `br_cond`, `jump`, and `label`
+- **Calls** and `ret`
+
+Rule-based optimizations on HIR:
+
+1. **Constant folding** — e.g. `2 + 3` → `5`
+2. **Algebraic simplification** — e.g. `x * 0` → `0`
+3. **Dead temp removal** — drop unused temporaries

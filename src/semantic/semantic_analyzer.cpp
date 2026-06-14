@@ -39,12 +39,10 @@ void SemanticAnalyzer::register_functions() {
         if (!func) {
             continue;
         }
-
         if (functions_.count(func->name) > 0) {
             error(func->location, "duplicate function '" + func->name + "'");
             continue;
         }
-
         FunctionSymbol symbol;
         symbol.return_type = func->return_type;
         symbol.location = func->location;
@@ -58,16 +56,13 @@ void SemanticAnalyzer::register_functions() {
 void SemanticAnalyzer::check_function(const FunctionDecl& func) {
     panic_mode_ = false;
     current_return_type_ = func.return_type;
-
     enter_scope();
     for (const Param& param : func.parameters) {
         declare_variable(param.name, param.type, param.location);
     }
-
     if (func.body) {
         check_block(*func.body);
     }
-
     exit_scope();
 }
 
@@ -86,13 +81,11 @@ bool SemanticAnalyzer::declare_variable(const std::string& name, TypeKind type,
     if (scopes_.empty()) {
         enter_scope();
     }
-
     auto& scope = scopes_.back();
     if (scope.count(name) > 0) {
         error(loc, "variable '" + name + "' already declared in this scope");
         return false;
     }
-
     scope.emplace(name, VariableSymbol{type, loc});
     return true;
 }
@@ -217,10 +210,9 @@ TypeKind SemanticAnalyzer::check_expression(const Expr& expr) {
         case Expr::Kind::BoolLiteral:
             return TypeKind::Bool;
         case Expr::Kind::Variable: {
-            const std::string& name = expr.variable.name;
-            const VariableSymbol* symbol = lookup_variable(name);
+            const VariableSymbol* symbol = lookup_variable(expr.variable.name);
             if (!symbol) {
-                error(expr.variable.location, "undefined variable '" + name + "'");
+                error(expr.variable.location, "undefined variable '" + expr.variable.name + "'");
                 return TypeKind::Int;
             }
             return symbol->type;
@@ -249,7 +241,6 @@ TypeKind SemanticAnalyzer::check_expression(const Expr& expr) {
             if (had_error_) {
                 return TypeKind::Int;
             }
-
             switch (expr.binary.op) {
                 case BinaryOp::Add:
                 case BinaryOp::Sub:
@@ -258,8 +249,7 @@ TypeKind SemanticAnalyzer::check_expression(const Expr& expr) {
                 case BinaryOp::Mod:
                     if (!is_numeric(left_type) || !is_numeric(right_type)) {
                         error(expr.binary.location,
-                              "arithmetic operator '" + std::string(binary_op_name(expr.binary.op)) +
-                                  "' requires int operands");
+                              "arithmetic operator requires int operands");
                     }
                     return TypeKind::Int;
                 case BinaryOp::Eq:
@@ -274,44 +264,39 @@ TypeKind SemanticAnalyzer::check_expression(const Expr& expr) {
                 case BinaryOp::Gt:
                 case BinaryOp::Ge:
                     if (!is_numeric(left_type) || !is_numeric(right_type)) {
-                        error(expr.binary.location,
-                              "comparison operator requires int operands");
+                        error(expr.binary.location, "comparison operator requires int operands");
                     }
                     return TypeKind::Bool;
                 case BinaryOp::And:
                 case BinaryOp::Or:
                     if (left_type != TypeKind::Bool || right_type != TypeKind::Bool) {
-                        error(expr.binary.location,
-                              "logical operator '" + std::string(binary_op_name(expr.binary.op)) +
-                                  "' requires bool operands");
+                        error(expr.binary.location, "logical operator requires bool operands");
                     }
                     return TypeKind::Bool;
             }
             return TypeKind::Int;
         }
         case Expr::Kind::Call: {
-            const std::string& callee = expr.call.callee;
-            const FunctionSymbol* symbol = lookup_function(callee);
+            const FunctionSymbol* symbol = lookup_function(expr.call.callee);
             if (!symbol) {
-                error(expr.call.location, "undefined function '" + callee + "'");
+                error(expr.call.location, "undefined function '" + expr.call.callee + "'");
                 return TypeKind::Int;
             }
-
             if (expr.call.arguments.size() != symbol->parameter_types.size()) {
                 std::ostringstream msg;
-                msg << "call to '" << callee << "' expects " << symbol->parameter_types.size()
-                    << " argument(s), got " << expr.call.arguments.size();
+                msg << "call to '" << expr.call.callee << "' expects "
+                    << symbol->parameter_types.size() << " argument(s), got "
+                    << expr.call.arguments.size();
                 error(expr.call.location, msg.str());
                 return symbol->return_type;
             }
-
             for (std::size_t i = 0; i < expr.call.arguments.size(); ++i) {
                 const TypeKind arg_type = check_expression(*expr.call.arguments[i]);
-                const TypeKind param_type = symbol->parameter_types[i];
-                if (!had_error_ && !types_equal(arg_type, param_type)) {
+                if (!had_error_ && !types_equal(arg_type, symbol->parameter_types[i])) {
                     std::ostringstream msg;
-                    msg << "argument " << (i + 1) << " of call to '" << callee << "' expects "
-                        << type_name(param_type) << ", got " << type_name(arg_type);
+                    msg << "argument " << (i + 1) << " of call to '" << expr.call.callee
+                        << "' expects " << type_name(symbol->parameter_types[i]) << ", got "
+                        << type_name(arg_type);
                     error(expr.call.arguments[i]->location(), msg.str());
                 }
             }

@@ -40,27 +40,28 @@ cmake -S . -B build
 cmake --build build
 ```
 
-## Current phase: Semantic analysis
+## Current phase: HIR + optimizations
 
-The front end runs lexer → parser → semantic analyzer. Use the semantic driver to type-check a program:
+The front end lowers semantically valid programs to **HIR** (high-level IR) and runs rule-based optimizations:
 
 ```bash
-make semantic
-./build/minilang_semantic tests/programs/factorial.minilang
+make hir
+./build/minilang_hir tests/programs/factorial.minilang
 ```
 
-Earlier stages are still available:
+Earlier stages:
 
 ```bash
 ./build/minilang_lexer tests/programs/factorial.minilang
 ./build/minilang_parser tests/programs/factorial.minilang
+./build/minilang_semantic tests/programs/factorial.minilang
 ```
 
 ## Roadmap
 
 1. ~~Lexer~~ ✓
 2. ~~Parser + AST~~ ✓
-3. ~~Semantic analysis~~ ✓ (current)
-4. HIR + rule-based optimizations
+3. ~~Semantic analysis~~ ✓
+4. ~~HIR + rule-based optimizations~~ ✓ (current)
 5. LLVM IR emission
 6. ML optimization advisor + evaluation harness

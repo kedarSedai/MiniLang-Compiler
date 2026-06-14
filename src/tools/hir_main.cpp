@@ -1,3 +1,6 @@
+#include "minilang/hir/hir.hpp"
+#include "minilang/hir/hir_lower.hpp"
+#include "minilang/hir/optimize.hpp"
 #include "minilang/lexer/lexer.hpp"
 #include "minilang/parser/parser.hpp"
 #include "minilang/semantic/semantic_analyzer.hpp"
@@ -23,7 +26,7 @@ std::string read_file(const std::string& path) {
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
-        std::cerr << "Usage: minilang_semantic <file.minilang>\n";
+        std::cerr << "Usage: minilang_hir <file.minilang>\n";
         return 1;
     }
 
@@ -42,7 +45,17 @@ int main(int argc, char* argv[]) {
             return 2;
         }
 
-        std::cout << "semantic analysis OK: " << path << '\n';
+        minilang::HirLowerer lowerer;
+        minilang::HirModule module = lowerer.lower(program);
+
+        minilang::HirOptimizer optimizer(module);
+        const minilang::OptimizationStats stats = optimizer.run();
+
+        std::cout << "HIR for " << path << '\n';
+        std::cout << "optimizations: constant_folds=" << stats.constant_folds
+                  << " algebraic=" << stats.algebraic_simplifications
+                  << " dead_temps_removed=" << stats.dead_temps_removed << '\n';
+        minilang::dump_hir_module(std::cout, module);
     } catch (const std::exception& ex) {
         std::cerr << "error: " << ex.what() << '\n';
         return 1;
