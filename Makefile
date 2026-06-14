@@ -17,6 +17,8 @@ parser: $(PARSER_TARGET)
 semantic: $(SEMANTIC_TARGET)
 hir: $(HIR_TARGET)
 
+semantic: $(SEMANTIC_TARGET)
+
 $(LEXER_TARGET): $(FRONTEND_SRCS) src/tools/lexer_main.cpp | build
 	$(CXX) $(CXXFLAGS) -o $@ $(FRONTEND_SRCS) src/tools/lexer_main.cpp
 
