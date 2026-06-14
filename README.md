@@ -40,26 +40,28 @@ cmake -S . -B build
 cmake --build build
 ```
 
-## Current phase: Parser + AST
+## Current phase: HIR + optimizations
 
-The lexer and a hand-written recursive-descent parser build an AST. Use the parser driver to print the tree:
+The front end lowers semantically valid programs to **HIR** (high-level IR) and runs rule-based optimizations:
 
 ```bash
-make parser
-./build/minilang_parser tests/programs/factorial.minilang
+make hir
+./build/minilang_hir tests/programs/factorial.minilang
 ```
 
-The lexer driver is still available:
+Earlier stages:
 
 ```bash
 ./build/minilang_lexer tests/programs/factorial.minilang
+./build/minilang_parser tests/programs/factorial.minilang
+./build/minilang_semantic tests/programs/factorial.minilang
 ```
 
 ## Roadmap
 
 1. ~~Lexer~~ ✓
-2. ~~Parser + AST~~ ✓ (current)
-3. Semantic analysis
-4. HIR + rule-based optimizations
+2. ~~Parser + AST~~ ✓
+3. ~~Semantic analysis~~ ✓
+4. ~~HIR + rule-based optimizations~~ ✓ (current)
 5. LLVM IR emission
 6. ML optimization advisor + evaluation harness

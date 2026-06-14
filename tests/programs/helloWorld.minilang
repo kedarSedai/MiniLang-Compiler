@@ -1,6 +1,5 @@
-/ print hello world
+// print hello world
 
-int main ()
-{
+int main() {
     return 0;
 }

@@ -10,6 +10,10 @@ add_library(minilang_frontend
     src/lexer/lexer.cpp
     src/ast/ast.cpp
     src/parser/parser.cpp
+    src/semantic/semantic_analyzer.cpp
+    src/hir/hir.cpp
+    src/hir/hir_lower.cpp
+    src/hir/optimize.cpp
 )
 
 target_include_directories(minilang_frontend
@@ -27,16 +31,17 @@ target_link_libraries(minilang_lexer PRIVATE minilang_frontend)
 add_executable(minilang_parser src/tools/parser_main.cpp)
 target_link_libraries(minilang_parser PRIVATE minilang_frontend)
 
+add_executable(minilang_semantic src/tools/semantic_main.cpp)
+target_link_libraries(minilang_semantic PRIVATE minilang_frontend)
+
+add_executable(minilang_hir src/tools/hir_main.cpp)
+target_link_libraries(minilang_hir PRIVATE minilang_frontend)
+
 enable_testing()
-add_test(
-    NAME lexer_smoke
-    COMMAND minilang_lexer ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
-)
-add_test(
-    NAME parser_smoke
-    COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
-)
-add_test(
-    NAME parser_hello
-    COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang
-)
+add_test(NAME lexer_smoke COMMAND minilang_lexer ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
+add_test(NAME parser_smoke COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
+add_test(NAME parser_hello COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang)
+add_test(NAME semantic_factorial COMMAND minilang_semantic ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
+add_test(NAME semantic_hello COMMAND minilang_semantic ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang)
+add_test(NAME hir_factorial COMMAND minilang_hir ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
+add_test(NAME hir_hello COMMAND minilang_hir ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang)
