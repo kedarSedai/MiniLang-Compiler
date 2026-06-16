@@ -6,6 +6,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace minilang {
@@ -55,6 +56,7 @@ struct HirFunction {
     TypeKind return_type = TypeKind::Int;
     std::vector<Param> parameters;
     std::vector<std::string> locals;
+    std::unordered_map<std::string, TypeKind> local_types;
     std::vector<HirInstr> instructions;
 };
 

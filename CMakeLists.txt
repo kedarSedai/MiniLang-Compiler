@@ -14,6 +14,7 @@ add_library(minilang_frontend
     src/hir/hir.cpp
     src/hir/hir_lower.cpp
     src/hir/optimize.cpp
+    src/codegen/llvm_emitter.cpp
 )
 
 target_include_directories(minilang_frontend
@@ -37,6 +38,9 @@ target_link_libraries(minilang_semantic PRIVATE minilang_frontend)
 add_executable(minilang_hir src/tools/hir_main.cpp)
 target_link_libraries(minilang_hir PRIVATE minilang_frontend)
 
+add_executable(minilang_compile src/tools/compile_main.cpp)
+target_link_libraries(minilang_compile PRIVATE minilang_frontend)
+
 enable_testing()
 add_test(NAME lexer_smoke COMMAND minilang_lexer ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
 add_test(NAME parser_smoke COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
@@ -45,3 +49,13 @@ add_test(NAME semantic_factorial COMMAND minilang_semantic ${CMAKE_SOURCE_DIR}/t
 add_test(NAME semantic_hello COMMAND minilang_semantic ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang)
 add_test(NAME hir_factorial COMMAND minilang_hir ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
 add_test(NAME hir_hello COMMAND minilang_hir ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang)
+add_test(
+    NAME compile_hello_world
+    COMMAND minilang_compile ${CMAKE_SOURCE_DIR}/tests/programs/helloWorld.minilang
+            -o ${CMAKE_BINARY_DIR}/helloWorld.ll
+)
+add_test(
+    NAME compile_factorial
+    COMMAND minilang_compile ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
+            -o ${CMAKE_BINARY_DIR}/factorial.ll
+)

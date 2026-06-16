@@ -27,7 +27,7 @@ void HirLowerer::lower_function(const FunctionDecl& func) {
     push_scope();
 
     for (const Param& param : func.parameters) {
-        declare_local(param.name);
+        declare_local(param.name, param.type);
     }
 
     if (func.body) {
@@ -56,7 +56,7 @@ void HirLowerer::lower_statement(const Stmt& stmt) {
             break;
         case Stmt::Kind::VarDecl: {
             const VarDeclStmt& decl = stmt.var_decl;
-            declare_local(decl.name);
+            declare_local(decl.name, decl.type);
             if (decl.initializer) {
                 const int value_temp = lower_expression(*decl.initializer);
                 HirInstr store;
@@ -276,14 +276,15 @@ std::string HirLowerer::fresh_label(const std::string& prefix) {
     return prefix + '_' + std::to_string(next_label_++);
 }
 
-void HirLowerer::declare_local(const std::string& name) {
+void HirLowerer::declare_local(const std::string& name, TypeKind type) {
     if (scope_stack_.empty()) {
         push_scope();
     }
-    if (scope_stack_.back().end() ==
-        std::find(scope_stack_.back().begin(), scope_stack_.back().end(), name)) {
+    if (std::find(scope_stack_.back().begin(), scope_stack_.back().end(), name) ==
+        scope_stack_.back().end()) {
         scope_stack_.back().push_back(name);
         current_->locals.push_back(name);
+        current_->local_types[name] = type;
     }
 }
 

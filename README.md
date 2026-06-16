@@ -40,20 +40,26 @@ cmake -S . -B build
 cmake --build build
 ```
 
-## Current phase: HIR + optimizations
+## Current phase: LLVM IR emission
 
-The front end lowers semantically valid programs to **HIR** (high-level IR) and runs rule-based optimizations:
+The compiler lowers optimized HIR to **textual LLVM IR** (`.ll` files):
 
 ```bash
-make hir
-./build/minilang_hir tests/programs/factorial.minilang
+make compile
+./build/minilang_compile tests/programs/helloWorld.minilang -o build/helloWorld.ll
+```
+
+Compile and run (requires `clang`):
+
+```bash
+./build/minilang_compile tests/programs/helloWorld.minilang -o build/helloWorld.ll --run
+clang build/factorial.ll -o build/factorial && ./build/factorial; echo exit:$?
 ```
 
 Earlier stages:
 
 ```bash
-./build/minilang_lexer tests/programs/factorial.minilang
-./build/minilang_parser tests/programs/factorial.minilang
+./build/minilang_hir tests/programs/factorial.minilang
 ./build/minilang_semantic tests/programs/factorial.minilang
 ```
 
@@ -62,6 +68,6 @@ Earlier stages:
 1. ~~Lexer~~ ✓
 2. ~~Parser + AST~~ ✓
 3. ~~Semantic analysis~~ ✓
-4. ~~HIR + rule-based optimizations~~ ✓ (current)
-5. LLVM IR emission
+4. ~~HIR + rule-based optimizations~~ ✓
+5. ~~LLVM IR emission~~ ✓ (current)
 6. ML optimization advisor + evaluation harness
