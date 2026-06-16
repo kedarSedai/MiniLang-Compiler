@@ -24,7 +24,7 @@ private:
 
     int fresh_temp();
     std::string fresh_label(const std::string& prefix);
-    void declare_local(const std::string& name);
+    void declare_local(const std::string& name, TypeKind type = TypeKind::Int);
     void push_scope();
     void pop_scope();
 };

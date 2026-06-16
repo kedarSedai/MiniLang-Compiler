@@ -70,3 +70,14 @@ Rule-based optimizations on HIR:
 1. **Constant folding** — e.g. `2 + 3` → `5`
 2. **Algebraic simplification** — e.g. `x * 0` → `0`
 3. **Dead temp removal** — drop unused temporaries
+
+## LLVM IR (codegen)
+
+`minilang_compile` emits textual LLVM IR (`.ll`) from optimized HIR:
+
+- Locals → `alloca` + `load`/`store`
+- Temporaries → SSA-like `%tN` values
+- Control flow → `br`, `br i1`, basic block labels
+- Functions → `define @name(...)`
+
+Optional `--run` invokes `clang` on the generated IR.
