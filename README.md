@@ -29,8 +29,7 @@ compiler/
 **Makefile (no CMake required):**
 
 ```bash
-make
-./build/minilang_parser tests/programs/hello.minilang
+make compile
 ```
 
 **CMake (optional):**
@@ -40,26 +39,38 @@ cmake -S . -B build
 cmake --build build
 ```
 
-## Current phase: Parser + AST
+## How to run
 
-The lexer and a hand-written recursive-descent parser build an AST. Use the parser driver to print the tree:
+Compile a MiniLang program to LLVM IR, build with `clang`, and run (requires `clang`):
 
 ```bash
-make parser
-./build/minilang_parser tests/programs/factorial.minilang
+make compile
+./build/minilang_compile tests/programs/factorial.minilang -o build/out.ll --run
+echo exit:$?
 ```
 
-The lexer driver is still available:
+For `factorial.minilang`, `echo exit:$?` prints `120` (factorial of 5). Programs communicate numeric results via `return` from `main` until a `print` builtin is added.
+
+Emit LLVM IR only (no run):
+
+```bash
+./build/minilang_compile tests/programs/factorial.minilang -o build/out.ll
+```
+
+Earlier pipeline stages:
 
 ```bash
 ./build/minilang_lexer tests/programs/factorial.minilang
+./build/minilang_parser tests/programs/factorial.minilang
+./build/minilang_semantic tests/programs/factorial.minilang
+./build/minilang_hir tests/programs/factorial.minilang
 ```
 
 ## Roadmap
 
 1. ~~Lexer~~ ✓
-2. ~~Parser + AST~~ ✓ (current)
-3. Semantic analysis
-4. HIR + rule-based optimizations
-5. LLVM IR emission
+2. ~~Parser + AST~~ ✓
+3. ~~Semantic analysis~~ ✓
+4. ~~HIR + rule-based optimizations~~ ✓
+5. ~~LLVM IR emission~~ ✓ (current)
 6. ML optimization advisor + evaluation harness
