@@ -64,6 +64,27 @@ Earlier pipeline stages:
 ./build/minilang_parser tests/programs/factorial.minilang
 ./build/minilang_semantic tests/programs/factorial.minilang
 ./build/minilang_hir tests/programs/factorial.minilang
+## Current phase: LLVM IR emission
+
+The compiler lowers optimized HIR to **textual LLVM IR** (`.ll` files):
+
+```bash
+make compile
+./build/minilang_compile tests/programs/helloWorld.minilang -o build/helloWorld.ll
+```
+
+Compile and run (requires `clang`):
+
+```bash
+./build/minilang_compile tests/programs/helloWorld.minilang -o build/helloWorld.ll --run
+clang build/factorial.ll -o build/factorial && ./build/factorial; echo exit:$?
+```
+
+Earlier stages:
+
+```bash
+./build/minilang_hir tests/programs/factorial.minilang
+./build/minilang_semantic tests/programs/factorial.minilang
 ```
 
 ## Roadmap
