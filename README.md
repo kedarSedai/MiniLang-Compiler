@@ -53,6 +53,31 @@ echo exit:$?
 
 For `factorial.minilang`, `echo exit:$?` prints `120` (factorial of 5). Programs communicate numeric results via `return` from `main` until a `print` builtin is added.
 
+Emit LLVM IR only (no run):
+
+```bash
+./build/minilang_compile tests/programs/factorial.minilang -o build/out.ll
+```
+
+Earlier pipeline stages:
+
+```bash
+./build/minilang_lexer tests/programs/factorial.minilang
+./build/minilang_parser tests/programs/factorial.minilang
+./build/minilang_semantic tests/programs/factorial.minilang
+./build/minilang_hir tests/programs/factorial.minilang
+## Current phase: LLVM IR emission
+
+Compile a MiniLang program to LLVM IR, build with `clang`, and run (requires `clang`):
+
+```bash
+make compile
+./build/minilang_compile tests/programs/factorial.minilang -o build/out.ll --run
+echo exit:$?
+```
+
+For `factorial.minilang`, `echo exit:$?` prints `120` (factorial of 5). Programs communicate numeric results via `return` from `main` until a `print` builtin is added.
+
 ### ML optimization advisor
 
 The compiler can select HIR optimization passes from program features:
