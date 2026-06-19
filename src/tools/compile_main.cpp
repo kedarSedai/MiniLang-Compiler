@@ -11,7 +11,22 @@
 #include <sstream>
 #include <string>
 
+#ifndef _WIN32
+#include <sys/wait.h>
+#endif
+
 namespace {
+
+int decode_exit_status(int status) {
+#ifndef _WIN32
+    if (WIFEXITED(status)) {
+        return WEXITSTATUS(status);
+    }
+    return 1;
+#else
+    return status;
+#endif
+}
 
 std::string read_file(const std::string& path) {
     std::ifstream in(path);
@@ -36,9 +51,7 @@ std::string default_output_path(const std::string& input) {
     return input + ".ll";
 }
 
-int run_clang(const std::string& ll_path, const std::string& exe_path) {
-    const std::string cmd =
-        "clang " + ll_path + " -o " + exe_path + " -Wno-override-module 2>&1";
+int run_command(const std::string& cmd) {
     std::cerr << "running: " << cmd << '\n';
     return std::system(cmd.c_str());
 }
@@ -100,16 +113,17 @@ int main(int argc, char* argv[]) {
 
         if (run_after) {
             const std::string exe = "build/a.out";
-            if (run_clang(output, exe) != 0) {
+            const std::string clang_cmd =
+                "clang " + output + " -o " + exe + " -Wno-override-module 2>&1";
+            const int clang_status = run_command(clang_cmd);
+            if (decode_exit_status(clang_status) != 0) {
                 std::cerr << "clang failed to compile " << output << '\n';
                 return 3;
             }
-            const int exit_code = std::system(exe.c_str());
-            if (exit_code != 0) {
-                std::cerr << "program exited with code " << exit_code << '\n';
-                return exit_code;
-            }
-            std::cout << "program ran successfully (exit 0)\n";
+            const int run_status = run_command(exe);
+            const int exit_code = decode_exit_status(run_status);
+            std::cout << "program exit code: " << exit_code << '\n';
+            return exit_code;
         }
     } catch (const std::exception& ex) {
         std::cerr << "error: " << ex.what() << '\n';
