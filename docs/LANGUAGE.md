@@ -50,4 +50,34 @@ arguments   ::= expression ( "," expression )*
 type        ::= "int" | "bool" | "void"
 ```
 
-Semantics (types, scopes) are not checked yet; the parser only validates syntax.
+## Semantic rules
+
+- Functions: no duplicates; calls match arity and parameter types.
+- Variables: declare before use; block scopes with optional shadowing.
+- Types: `int`/`bool` enforced on operators, conditions, returns, and initializers.
+
+## HIR (high-level IR)
+
+After semantic analysis, the AST is lowered to flat HIR per function:
+
+- **Temporaries** (`%t0`, `%t1`, …) for expression results
+- **Locals** via `load_local` / `store_local`
+- **Control flow** via `br_cond`, `jump`, and `label`
+- **Calls** and `ret`
+
+Rule-based optimizations on HIR:
+
+1. **Constant folding** — e.g. `2 + 3` → `5`
+2. **Algebraic simplification** — e.g. `x * 0` → `0`
+3. **Dead temp removal** — drop unused temporaries
+
+## LLVM IR (codegen)
+
+`minilang_compile` emits textual LLVM IR (`.ll`) from optimized HIR:
+
+- Locals → `alloca` + `load`/`store`
+- Temporaries → SSA-like `%tN` values
+- Control flow → `br`, `br i1`, basic block labels
+- Functions → `define @name(...)`
+
+Optional `--run` invokes `clang` on the generated IR.

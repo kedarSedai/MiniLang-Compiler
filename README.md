@@ -11,7 +11,7 @@ A small research compiler with the classic pipeline: **lexer → parser → sema
 | Lexer/parser | Hand-written or Flex/Bison (standard in courses) | `logos` / `lalrpop` (excellent ergonomics) |
 | ML inference later | ONNX Runtime C++, Python subprocess, or `llama.cpp` CLI | Same options via FFI |
 
-**Decision:** **C++17** with CMake, hand-written lexer/parser (clear for a paper and debugging), and LLVM for the back end in later phases. Comfort + LLVM alignment outweigh Rust’s safety benefits for this solo timeline.
+**Decision:** **C++17** with CMake, hand-written lexer/parser (clear for a paper and debugging), and LLVM for the back end in later phases. Comfort + LLVM alignment outweigh Rust's safety benefits for this solo timeline.
 
 ## Project layout
 
@@ -20,6 +20,7 @@ compiler/
   CMakeLists.txt
   include/minilang/     # public headers
   src/                  # implementation
+  scripts/              # optional Python advisor
   tests/programs/       # sample MiniLang sources
   docs/LANGUAGE.md      # lexical + syntax sketch
 ```
@@ -30,6 +31,7 @@ compiler/
 
 ```bash
 make compile
+make eval
 ```
 
 **CMake (optional):**
@@ -51,10 +53,37 @@ echo exit:$?
 
 For `factorial.minilang`, `echo exit:$?` prints `120` (factorial of 5). Programs communicate numeric results via `return` from `main` until a `print` builtin is added.
 
-Emit LLVM IR only (no run):
+### ML optimization advisor
+
+The compiler can select HIR optimization passes from program features:
 
 ```bash
-./build/minilang_compile tests/programs/factorial.minilang -o build/out.ll
+# Built-in heuristic advisor
+./build/minilang_compile tests/programs/factorial.minilang --opt advised -o build/out.ll
+
+# Dump feature vector used by the advisor
+./build/minilang_compile tests/programs/opt_demo.minilang --opt advised --dump-features
+
+# Load a fixed pass plan from JSON
+./build/minilang_compile tests/programs/factorial.minilang \
+  --opt advised --advisor-plan tests/advisor/sample_plan.json -o build/out.ll
+
+# Delegate to an external Python model/script
+./build/minilang_compile tests/programs/factorial.minilang \
+  --opt advised --advisor-python scripts/advisor_heuristic.py -o build/out.ll
+```
+
+Compare **none**, **all**, and **advised** strategies across benchmarks:
+
+```bash
+make eval
+./build/minilang_eval tests/programs/factorial.minilang tests/programs/opt_demo.minilang
+```
+
+Disable optimizations:
+
+```bash
+./build/minilang_compile tests/programs/factorial.minilang --opt none -o build/out.ll
 ```
 
 Earlier pipeline stages:
@@ -72,5 +101,5 @@ Earlier pipeline stages:
 2. ~~Parser + AST~~ ✓
 3. ~~Semantic analysis~~ ✓
 4. ~~HIR + rule-based optimizations~~ ✓
-5. ~~LLVM IR emission~~ ✓ (current)
-6. ML optimization advisor + evaluation harness
+5. ~~LLVM IR emission~~ ✓
+6. ~~ML optimization advisor + evaluation harness~~ ✓

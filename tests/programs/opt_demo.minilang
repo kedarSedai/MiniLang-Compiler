@@ -1,0 +1,8 @@
+int fold_me() {
+    return (2 + 3) * (10 - 4) + (8 / 2);
+}
+
+int main() {
+    int x = fold_me() + (1 + 1) * 0;
+    return x;
+}
