@@ -1,6 +1,7 @@
 #pragma once
 
 #include "minilang/hir/hir.hpp"
+#include "minilang/ml/pass_pipeline.hpp"
 
 namespace minilang {
 
@@ -13,12 +14,13 @@ struct OptimizationStats {
 /// Applies rule-based optimizations to HIR.
 class HirOptimizer {
 public:
-    explicit HirOptimizer(HirModule& module);
+    explicit HirOptimizer(HirModule& module, PassPlan plan = all_passes_plan());
 
     OptimizationStats run();
 
 private:
     bool optimize_function(HirFunction& func);
+    bool run_pass(HirFunction& func, OptPassKind pass);
     bool fold_constants(HirFunction& func);
     bool simplify_algebra(HirFunction& func);
     bool remove_dead_temps(HirFunction& func);
@@ -30,6 +32,7 @@ private:
     const HirInstr* find_def(int temp, const HirFunction& func, std::size_t before) const;
 
     HirModule& module_;
+    PassPlan plan_;
     OptimizationStats stats_;
 };
 

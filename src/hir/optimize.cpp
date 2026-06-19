@@ -24,22 +24,45 @@ bool is_bool_const(const HirInstr* def, bool* out) {
 
 }  // namespace
 
-HirOptimizer::HirOptimizer(HirModule& module) : module_(module) {}
+HirOptimizer::HirOptimizer(HirModule& module, PassPlan plan)
+    : module_(module), plan_(std::move(plan)) {}
 
 OptimizationStats HirOptimizer::run() {
-    for (std::unique_ptr<HirFunction>& func : module_.functions) {
-        if (func) {
-            optimize_function(*func);
+    if (plan_.passes.empty()) {
+        return stats_;
+    }
+
+    for (int iter = 0; iter < plan_.max_iterations; ++iter) {
+        bool changed = false;
+        for (std::unique_ptr<HirFunction>& func : module_.functions) {
+            if (func) {
+                changed = optimize_function(*func) || changed;
+            }
+        }
+        if (!changed) {
+            break;
         }
     }
     return stats_;
 }
 
+bool HirOptimizer::run_pass(HirFunction& func, OptPassKind pass) {
+    switch (pass) {
+        case OptPassKind::ConstantFold:
+            return fold_constants(func);
+        case OptPassKind::AlgebraicSimplify:
+            return simplify_algebra(func);
+        case OptPassKind::DeadTempRemove:
+            return remove_dead_temps(func);
+    }
+    return false;
+}
+
 bool HirOptimizer::optimize_function(HirFunction& func) {
     bool changed = false;
-    changed = fold_constants(func) || changed;
-    changed = simplify_algebra(func) || changed;
-    changed = remove_dead_temps(func) || changed;
+    for (OptPassKind pass : plan_.passes) {
+        changed = run_pass(func, pass) || changed;
+    }
     return changed;
 }
 

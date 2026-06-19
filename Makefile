@@ -2,22 +2,26 @@ CXX ?= g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -Wpedantic -Iinclude
 FRONTEND_SRCS = src/lexer/token.cpp src/lexer/lexer.cpp src/ast/ast.cpp src/parser/parser.cpp \
                 src/semantic/semantic_analyzer.cpp src/hir/hir.cpp src/hir/hir_lower.cpp \
-                src/hir/optimize.cpp src/codegen/llvm_emitter.cpp
+                src/hir/optimize.cpp src/codegen/llvm_emitter.cpp \
+                src/ml/features.cpp src/ml/pass_pipeline.cpp src/ml/ml_advisor.cpp \
+                src/ml/eval_harness.cpp
 LEXER_TARGET = build/minilang_lexer
 PARSER_TARGET = build/minilang_parser
 SEMANTIC_TARGET = build/minilang_semantic
 HIR_TARGET = build/minilang_hir
 COMPILE_TARGET = build/minilang_compile
+EVAL_TARGET = build/minilang_eval
 
-.PHONY: all clean test lexer parser semantic hir compile
+.PHONY: all clean test lexer parser semantic hir compile eval
 
-all: $(LEXER_TARGET) $(PARSER_TARGET) $(SEMANTIC_TARGET) $(HIR_TARGET) $(COMPILE_TARGET)
+all: $(LEXER_TARGET) $(PARSER_TARGET) $(SEMANTIC_TARGET) $(HIR_TARGET) $(COMPILE_TARGET) $(EVAL_TARGET)
 
 lexer: $(LEXER_TARGET)
 parser: $(PARSER_TARGET)
 semantic: $(SEMANTIC_TARGET)
 hir: $(HIR_TARGET)
 compile: $(COMPILE_TARGET)
+eval: $(EVAL_TARGET)
 
 $(LEXER_TARGET): $(FRONTEND_SRCS) src/tools/lexer_main.cpp | build
 	$(CXX) $(CXXFLAGS) -o $@ $(FRONTEND_SRCS) src/tools/lexer_main.cpp
@@ -34,10 +38,13 @@ $(HIR_TARGET): $(FRONTEND_SRCS) src/tools/hir_main.cpp | build
 $(COMPILE_TARGET): $(FRONTEND_SRCS) src/tools/compile_main.cpp | build
 	$(CXX) $(CXXFLAGS) -o $@ $(FRONTEND_SRCS) src/tools/compile_main.cpp
 
+$(EVAL_TARGET): $(FRONTEND_SRCS) src/tools/eval_main.cpp | build
+	$(CXX) $(CXXFLAGS) -o $@ $(FRONTEND_SRCS) src/tools/eval_main.cpp
+
 build:
 	mkdir -p build
 
-test: $(LEXER_TARGET) $(PARSER_TARGET) $(SEMANTIC_TARGET) $(HIR_TARGET) $(COMPILE_TARGET)
+test: $(LEXER_TARGET) $(PARSER_TARGET) $(SEMANTIC_TARGET) $(HIR_TARGET) $(COMPILE_TARGET) $(EVAL_TARGET)
 	./$(LEXER_TARGET) tests/programs/factorial.minilang > /dev/null
 	./$(LEXER_TARGET) tests/programs/hello.minilang > /dev/null
 	./$(PARSER_TARGET) tests/programs/factorial.minilang > /dev/null
@@ -48,6 +55,8 @@ test: $(LEXER_TARGET) $(PARSER_TARGET) $(SEMANTIC_TARGET) $(HIR_TARGET) $(COMPIL
 	./$(HIR_TARGET) tests/programs/hello.minilang > /dev/null
 	./$(COMPILE_TARGET) tests/programs/helloWorld.minilang -o build/helloWorld.ll
 	./$(COMPILE_TARGET) tests/programs/factorial.minilang -o build/factorial.ll
+	./$(COMPILE_TARGET) tests/programs/factorial.minilang --opt advised --dump-features -o build/factorial_advised.ll > /dev/null
+	./$(EVAL_TARGET) tests/programs/factorial.minilang tests/programs/opt_demo.minilang > /dev/null
 
 clean:
 	rm -rf build

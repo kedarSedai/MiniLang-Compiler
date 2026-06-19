@@ -1,0 +1,4 @@
+{
+  "passes": ["constant_fold", "dead_temp_remove"],
+  "max_iterations": 2
+}

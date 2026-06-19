@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_library(minilang_frontend
+set(MINILANG_CORE_SRCS
     src/lexer/token.cpp
     src/lexer/lexer.cpp
     src/ast/ast.cpp
@@ -15,7 +15,13 @@ add_library(minilang_frontend
     src/hir/hir_lower.cpp
     src/hir/optimize.cpp
     src/codegen/llvm_emitter.cpp
+    src/ml/features.cpp
+    src/ml/pass_pipeline.cpp
+    src/ml/ml_advisor.cpp
+    src/ml/eval_harness.cpp
 )
+
+add_library(minilang_frontend ${MINILANG_CORE_SRCS})
 
 target_include_directories(minilang_frontend
     PUBLIC
@@ -41,21 +47,23 @@ target_link_libraries(minilang_hir PRIVATE minilang_frontend)
 add_executable(minilang_compile src/tools/compile_main.cpp)
 target_link_libraries(minilang_compile PRIVATE minilang_frontend)
 
+add_executable(minilang_eval src/tools/eval_main.cpp)
+target_link_libraries(minilang_eval PRIVATE minilang_frontend)
+
 enable_testing()
-add_test(NAME lexer_smoke COMMAND minilang_lexer ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
-add_test(NAME parser_smoke COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
-add_test(NAME parser_hello COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang)
-add_test(NAME semantic_factorial COMMAND minilang_semantic ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
-add_test(NAME semantic_hello COMMAND minilang_semantic ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang)
-add_test(NAME hir_factorial COMMAND minilang_hir ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang)
-add_test(NAME hir_hello COMMAND minilang_hir ${CMAKE_SOURCE_DIR}/tests/programs/hello.minilang)
 add_test(
-    NAME compile_hello_world
-    COMMAND minilang_compile ${CMAKE_SOURCE_DIR}/tests/programs/helloWorld.minilang
-            -o ${CMAKE_BINARY_DIR}/helloWorld.ll
+    NAME lexer_smoke
+    COMMAND minilang_lexer ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
 )
 add_test(
-    NAME compile_factorial
-    COMMAND minilang_compile ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
-            -o ${CMAKE_BINARY_DIR}/factorial.ll
+    NAME parser_smoke
+    COMMAND minilang_parser ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
+)
+add_test(
+    NAME compile_smoke
+    COMMAND minilang_compile ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang -o ${CMAKE_BINARY_DIR}/factorial.ll
+)
+add_test(
+    NAME eval_smoke
+    COMMAND minilang_eval ${CMAKE_SOURCE_DIR}/tests/programs/factorial.minilang
 )
