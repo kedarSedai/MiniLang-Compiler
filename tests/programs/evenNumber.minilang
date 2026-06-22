@@ -1,0 +1,16 @@
+// last even <= 10
+
+int findEven(int i){
+    if (i < 0){
+        return 0;
+    }
+
+    if (i % 2 == 0){
+        return i;
+    }
+    return findEven(i - 1);
+}
+
+int main () {
+   return findEven(10);
+}
